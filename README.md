@@ -1,7 +1,6 @@
 # 🎓 Student Results fetching Automation 🚀
 
-This project automates the process of fetching 2023-2025 M.Sc. CS students 4th semester results from the [GACSLM7 eCampus portal](https://ecampus.cc/gacslm7/index.php) using Selenium and saves all results in an HTML file.  
-Afterward, it extracts each student's marks and totals them from the HTML file and paste it into student_results.xlsx. 📊
+This project automates the process of fetching 2023-2025 M.Sc. CS students 4th semester results from the [GACSLM7 eCampus portal](https://ecampus.cc/gacslm7/index.php) using Selenium and saves all results in an HTML file.  Afterward, it extracts each student's marks and totals them from the HTML file and paste it into student_results.xlsx. 📊
 
 ---
 
