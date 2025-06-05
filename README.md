@@ -3,8 +3,7 @@
 This project automates the process of fetching 2023-2025 M.Sc. CS students 4th semester results from the [GACSLM7 eCampus portal](https://ecampus.cc/gacslm7/index.php) using Selenium and saves all results in an HTML file.  Afterward, it extracts each student's marks and totals them from the HTML file and paste it into student_results.xlsx. 📊
 
 ---
-[![Stargazers repo roster for @LoganathanBCA/Government-Arts-College-Autonomous-Salem-7-Results-Scraper](https://reporoster.com/stars/dark/LoganathanBCA/Government-Arts-College-Autonomous-Salem-7-Results-Scraper)](https://github.com/LoganathanBCA/Government-Arts-College-Autonomous-Salem-7-Results-Scraper/stargazers)[![Forkers repo roster for @LoganathanBCA/Government-Arts-College-Autonomous-Salem-7-Results-Scraper](https://reporoster.com/forks/dark/LoganathanBCA/Government-Arts-College-Autonomous-Salem-7-Results-Scraper)](https://github.com/LoganathanBCA/Government-Arts-College-Autonomous-Salem-7-Results-Scraper/network/members)
-
+[![Forkers repo roster for @LoganathanBCA/Government-Arts-College-Autonomous-Salem-7-Results-Scraper](https://reporoster.com/forks/dark/LoganathanBCA/Government-Arts-College-Autonomous-Salem-7-Results-Scraper)](https://github.com/LoganathanBCA/Government-Arts-College-Autonomous-Salem-7-Results-Scraper/network/members) [![Stargazers repo roster for @LoganathanBCA/Government-Arts-College-Autonomous-Salem-7-Results-Scraper](https://reporoster.com/stars/dark/LoganathanBCA/Government-Arts-College-Autonomous-Salem-7-Results-Scraper)](https://github.com/LoganathanBCA/Government-Arts-College-Autonomous-Salem-7-Results-Scraper/stargazers)
 ---
 ## ✨ Features
 
