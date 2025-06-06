@@ -99,3 +99,15 @@ Feel free to submit pull requests or open issues for discussion.
 ## 📜 License
 
 This project is for educational and automation purposes.
+
+---
+---
+
+### 🔀 Alternate Version
+
+💡 Want the sarcastic behind-the-scenes version?
+
+👉 [**README.md V2** – The Chaos Edition](README_V2.md)
+
+Because sometimes the code isn’t the only thing messy 😅
+---
