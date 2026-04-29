@@ -1,113 +1,158 @@
-# 🎓 Student Results fetching Automation 🚀
+# 🎓 GACSLM7 Results Scraper
 
-This project automates the process of fetching 2023-2025 M.Sc. CS students 4th semester results from the [GACSLM7 eCampus portal](https://ecampus.cc/gacslm7/index.php) using Selenium and saves all results in an HTML file.  Afterward, it extracts each student's marks and totals them from the HTML file and paste it into student_results.xlsx. 📊
+A web application that automates scraping student exam results from the **Government Arts College (Autonomous), Salem-7** [eCampus portal](https://ecampus.cc/gacslm7/index.php). Upload a spreadsheet of student register numbers and dates of birth, hit scrape, and download a consolidated Excel report of all results — no manual copy-pasting needed.
 
----
-[![Forkers repo roster for @LoganathanBCA/Government-Arts-College-Autonomous-Salem-7-Results-Scraper](https://reporoster.com/forks/dark/LoganathanBCA/Government-Arts-College-Autonomous-Salem-7-Results-Scraper)](https://github.com/LoganathanBCA/Government-Arts-College-Autonomous-Salem-7-Results-Scraper/network/members) [![Stargazers repo roster for @LoganathanBCA/Government-Arts-College-Autonomous-Salem-7-Results-Scraper](https://reporoster.com/stars/dark/LoganathanBCA/Government-Arts-College-Autonomous-Salem-7-Results-Scraper)](https://github.com/LoganathanBCA/Government-Arts-College-Autonomous-Salem-7-Results-Scraper/stargazers)
----
 ## ✨ Features
 
-- 📑 Reads student data (register number and date of birth) from an Excel file.
-- 🤖 Automates form filling and result extraction using Microsoft Edge WebDriver.
-- 💾 Saves all student results in a single HTML file (`all_results.html`).
-- 🏁 Runs a post-processing script (`main_output_process.py`) after fetching results.
+- **Bulk Scraping** — Scrape results for dozens of students in one go, automatically
+- **Smart Retry** — Each student is retried up to 3 times if the portal is slow or unresponsive
+- **File Upload** — Accepts both `.xlsx` (Excel) and `.csv` file formats
+- **Live Progress** — Real-time progress bar, student-by-student status (✓ success / ✗ failed)
+- **Consolidated Export** — All results merged into a single Excel file with dynamically discovered subject columns
+- **Headless Browser** — Runs Chrome in the background (no visible browser window)
 
----
+## 📋 Requirements
 
-## 🛠️ Requirements
+- **Python 3.10+**
+- **Google Chrome** (installed on your system)
 
-- 🐍 Python 3.7+
-- 🌐 Microsoft Edge browser
-- 🧑‍💻 Edge WebDriver (`msedgedriver.exe`) in the project directory or in your PATH
+### Python Dependencies
 
-### 📦 Python Packages
+| Package | Purpose |
+|---------|---------|
+| `fastapi` | Web framework for the backend API |
+| `uvicorn[standard]` | ASGI server to run FastAPI |
+| `selenium` | Browser automation for scraping |
+| `webdriver-manager` | Auto-downloads the correct ChromeDriver |
+| `beautifulsoup4` | HTML parsing of result tables |
+| `pandas` | Data manipulation and DataFrame building |
+| `openpyxl` | Excel file reading and writing |
+| `python-multipart` | File upload handling in FastAPI |
 
-Install dependencies using:
+## 🚀 How to Run
 
-```sh
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/LoganathanBCA/Government-Arts-College-Autonomous-Salem-7-Results-Scraper.git
+cd Government-Arts-College-Autonomous-Salem-7-Results-Scraper
+```
+
+### 2. Install dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-Contents of `requirements.txt`:
+This installs: `fastapi`, `uvicorn[standard]`, `selenium`, `webdriver-manager`, `beautifulsoup4`, `pandas`, `openpyxl`, and `python-multipart`.
+
+### 3. Start the server
+
+```bash
+uvicorn backend.main:app --reload
 ```
-pandas
-openpyxl
-selenium
-beautifulsoup4
+
+### 4. Open in browser
+
+Go to [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+## 📄 Input File Format
+
+The input file must be either `.xlsx` (Excel) or `.csv` with **exactly two columns**:
+
+| Column | Header Name | Format | Example |
+|--------|-------------|--------|---------|
+| 1 | `register_no` | 2-digit year + 3-letter dept code + 6-digit number | `24UCS250904` |
+| 2 | `dob` | Date of birth in **mm/dd/yyyy** | `10/20/2006` |
+
+### Example `.xlsx` / `.csv`
+
+| register_no | dob |
+|-------------|------|
+| 24UCS250904 | 10/20/2006 |
+| 24UCS250905 | 11/28/2006 |
+| 24UCS250906 | 03/15/2006 |
+| ... | ... |
+
+### Important Notes
+
+- Column headers **must** be exactly `register_no` and `dob` (case-insensitive)
+- DOB supports multiple formats: `mm/dd/yyyy`, `dd/mm/yyyy`, `yyyy-mm-dd`, `dd-mm-yyyy`
+- The recommended format is `mm/dd/yyyy` to avoid ambiguity
+- If using `.csv`, ensure the file is UTF-8 encoded
+- No extra columns, empty rows, or merged cells — keep it simple
+
+## 🔄 How It Works
+
+### 1. 📤 Upload
+- User uploads a `.xlsx` or `.csv` file via the web interface  
+- Backend:
+  - Validates required columns  
+  - Parses and standardizes date formats  
+
+---
+
+### 2. 🌐 Scrape
+- User clicks **"Start Scraping"**  
+- Backend actions:
+  - Launches headless Chrome browser  
+  - Navigates to the results portal  
+
+- For each student:
+  - Fills:
+    - Register Number  
+    - Date of Birth  
+    - Email format  
+    - Mobile number  
+  - Submits the form  
+  - Clicks on the **"Result"** link  
+  - Extracts the result table HTML  
+  - Retries up to **3 times** if a failure occurs  
+
+---
+
+### 3. 🧠 Parse
+- Uses `BeautifulSoup` to extract structured data:
+  - Student Name  
+  - Register Number  
+  - Subject Codes & Marks *(dynamically detected)*  
+
+---
+
+### 4. 📊 Export
+- All parsed data is merged into a single DataFrame  
+- Output structure:
+  - Name  
+  - Register Number  
+  - Subjects  
+  - Total Marks  
+
+- Final output:
+  - Downloadable as **`student_results.xlsx`**  
+
+---
+
+
+## 📁 Project Structure
+
+```
+├── backend/
+│   ├── __init__.py
+│   ├── main.py          # FastAPI server & API endpoints
+│   ├── scraper.py       # Selenium browser automation
+│   ├── parser.py        # BeautifulSoup HTML parsing
+│   └── exporter.py      # Pandas Excel export
+├── frontend/
+│   ├── index.html       # UI structure
+│   ├── style.css        # Glassmorphic dark theme
+│   └── app.js           # Upload, progress & results logic
+├── requirements.txt
+├── .gitignore
+└── README.md
 ```
 
----
+## 👨‍💻 Credits
 
-## 🚦 Usage
+**OG Developer:** [Loganathan](https://github.com/LoganathanBCA)
 
-1. **Prepare the Excel file**  
-   Create a `students.xlsx` file with at least the following columns:
-   - `register_no`
-   - `dob` (in `DD/MM/YYYY` or `YYYY-MM-DD` format)
-
-2. **Place `msedgedriver.exe`**  
-   Download and place the correct version of `msedgedriver.exe` in your project folder.
-
-3. **Run the script**  
-   Execute the main script:
-   ```sh
-   python main.py
-   ```
-
-   After completion, `output_process.py` will run automatically. 🏃‍♂️
-
-4. **View Results**  
-   Open `all_results.html` or `student_result.xlsx` to see all student results. 🎉
-
----
-
-## 📝 Notes
-
-- ⚠️ Make sure the Edge WebDriver version matches your installed Edge browser version.
-- ✉️ The script uses placeholder email and mobile number fields. Adjust as needed.
-- 🛠️ If you encounter issues, check that all dependencies are installed and the Excel file is correctly formatted.
-
----
-
-## 🐞 Issues Faced When Creating This Project
-
-- **DOB Field Formatting:**  
-  Handling various date of birth formats in the Excel file required careful parsing and conversion to match the website's expected input.
-
-- **Unable to Screenshot the Page:**  
-  Direct screenshot automation was unreliable due to dynamic content and scrolling issues. As a workaround, web scraping was used to extract the required data.
-
-- **Random Order of Student Papers:**  
-  The order of subjects and the presence of arrears varied between students, making it challenging to extract marks consistently for each subject.
-
----
-
-## 🤝 Fork and Contribute
-
-- 💡 Suggestions for improvement are welcome!  
-- You can help by:
-  - 🖥️ Creating a user interface (UI)
-  - 📸 Improving screenshot automation
-  - 📈 Adding percentage, ranking, and more
-  - 🧩 Enhancing extraction logic for edge cases
-
-
-Feel free to submit pull requests or open issues for discussion.
-
----
-
-## 📜 License
-
-This project is for educational and automation purposes.
-
----
----
-
-### 🔀 Alternate Version
-
-💡 Want the sarcastic behind-the-scenes version?
-
-👉 [**README.md V2** – The Chaos Edition](README_V2.md)
-
-Because sometimes the code isn’t the only thing messy 😅
----
+**Reworked by:** [Balaji](https://github.com/balafromtn)
