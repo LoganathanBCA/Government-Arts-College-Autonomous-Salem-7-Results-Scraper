@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="GACSLM7 eCampus Results Scraper — Bulk download student exam results from Government Arts College (Autonomous), Salem-7">
+    <title>GACSLM7 Results Scraper</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Cursor glow tracker -->
+    <div class="cursor-glow" id="cursorGlow"></div>
+
+    <!-- Animated background -->
+    <div class="bg-particles" id="particles"></div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="48" height="48" rx="12" fill="url(#logoGrad)"/>
+                        <path d="M24 10L6 19L24 28L42 19L24 10Z" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 22.3333V31C12 35.4183 17.3726 39 24 39C30.6274 39 36 35.4183 36 31V22.3333" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M42 19V34" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="42" cy="36" r="2" fill="white"/>
+                        <defs>
+                            <linearGradient id="logoGrad" x1="0" y1="0" x2="48" y2="48">
+                                <stop stop-color="#6366f1"/>
+                                <stop offset="1" stop-color="#8b5cf6"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div>
+                    <h1>GACSLM7 Results Scraper</h1>
+                    <p class="subtitle">Government Arts College (Autonomous), Salem-7</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Format Hint Banner -->
+        <div class="format-banner" id="formatBanner">
+            <div class="banner-icon">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M10 6V11M10 14V14.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div class="banner-content">
+                <p class="banner-title"><strong>Input File Format</strong> — Upload <code>.xlsx</code> or <code>.csv</code> with these exact columns:</p>
+                <div class="format-table-wrapper">
+                    <table class="format-table">
+                        <thead>
+                            <tr>
+                                <th>register_no</th>
+                                <th>dob</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>24UCS250904</td>
+                                <td>10/20/2006</td>
+                            </tr>
+                            <tr>
+                                <td>24UCS250905</td>
+                                <td>11/28/2006</td>
+                            </tr>
+                            <tr class="format-row-hint">
+                                <td>...</td>
+                                <td>...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Upload Section -->
+            <section class="card upload-section" id="uploadSection">
+                <div class="card-header">
+                    <h2>
+                        <span class="step-badge">1</span>
+                        Upload Student Data
+                    </h2>
+                    <span class="file-types-badge">.xlsx .csv</span>
+                </div>
+                <div class="card-body">
+                    <div class="dropzone" id="dropzone">
+                        <div class="dropzone-content">
+                            <div class="dropzone-icon">
+                                <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                                    <rect x="4" y="8" width="48" height="40" rx="6" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4"/>
+                                    <path d="M28 20V36M20 28L28 20L36 28" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <p class="dropzone-title">Drag & drop your <strong>.xlsx</strong> or <strong>.csv</strong> file here</p>
+                            <p class="dropzone-subtitle">or click to browse</p>
+                            <input type="file" id="fileInput" accept=".xlsx,.csv" hidden>
+                        </div>
+                        <div class="dropzone-uploading" id="dropzoneUploading" style="display:none;">
+                            <div class="spinner"></div>
+                            <p>Uploading...</p>
+                        </div>
+                    </div>
+                    <div class="upload-result" id="uploadResult" style="display:none;">
+                        <div class="upload-success">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" fill="#10b981"/>
+                                <path d="M8 12L11 15L16 9" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span id="uploadMessage"></span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scrape Control -->
+            <section class="card scrape-section" id="scrapeSection">
+                <div class="card-header">
+                    <h2>
+                        <span class="step-badge">2</span>
+                        Scrape Results
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <button class="btn btn-primary btn-large" id="scrapeBtn" disabled>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M4 10C4 6.68629 6.68629 4 10 4C13.3137 4 16 6.68629 16 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M16 10C16 13.3137 13.3137 16 10 16C6.68629 16 4 13.3137 4 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 3"/>
+                            <circle cx="10" cy="10" r="2" fill="currentColor"/>
+                        </svg>
+                        Start Scraping
+                    </button>
+
+                    <!-- Progress Panel -->
+                    <div class="progress-panel" id="progressPanel" style="display:none;">
+                        <div class="progress-header">
+                            <div class="progress-stats">
+                                <span class="stat">
+                                    <span class="stat-value" id="statDone">0</span>
+                                    <span class="stat-label">/ <span id="statTotal">0</span></span>
+                                </span>
+                                <span class="stat-divider">•</span>
+                                <span class="stat current-stat">
+                                    Now: <strong id="statCurrent">—</strong>
+                                </span>
+                            </div>
+                            <div class="progress-percent" id="progressPercent">0%</div>
+                        </div>
+                        <div class="progress-bar-track">
+                            <div class="progress-bar-fill" id="progressBarFill"></div>
+                        </div>
+                        <div class="student-list" id="studentList"></div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- Results Preview -->
+            <section class="card results-section" id="resultsSection" style="display:none;">
+                <div class="card-header">
+                    <h2>
+                        <span class="step-badge">3</span>
+                        Results Preview
+                    </h2>
+                    <button class="btn btn-accent" id="downloadBtn">
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path d="M9 3V12M5 9L9 12L13 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M3 14H15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        Download Excel
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-wrapper">
+                        <table class="results-table" id="resultsTable">
+                            <thead id="resultsTableHead"></thead>
+                            <tbody id="resultsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <p>🔒 Privacy: Zero data retained after your session ends</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
