@@ -84,33 +84,54 @@ The input file must be either `.xlsx` (Excel) or `.csv` with **exactly two colum
 
 ## 🔄 How It Works
 
-```
-┌─────────────────────────────────────────────────────┐
-│  1. UPLOAD                                          │
-│     User uploads .xlsx or .csv file via the web UI  │
-│     → Backend validates columns & parses dates      │
-├─────────────────────────────────────────────────────┤
-│  2. SCRAPE                                          │
-│     User clicks "Start Scraping"                    │
-│     → Headless Chrome opens ecampus.cc/gacslm7      │
-│     → For each student:                             │
-│        • Fill register_no, dob, Format of email and mobile number│
-│        • Submit form → Click "Result" link          │
-│        • Extract the result table HTML              │
-│        • Retry up to 3 times on failure             │
-├─────────────────────────────────────────────────────┤
-│  3. PARSE                                           │
-│     BeautifulSoup extracts from each result table:  │
-│     → Student name, register number                 │
-│     → Subject codes & marks (dynamically discovered)│
-├─────────────────────────────────────────────────────┤
-│  4. EXPORT                                          │
-│     All parsed results merged into one DataFrame    │
-│     → Columns: Name | Register No | [Subjects] |   │
-│        Total                                        │
-│     → Downloadable as student_results.xlsx          │
-└─────────────────────────────────────────────────────┘
-```
+### 1. 📤 Upload
+- User uploads a `.xlsx` or `.csv` file via the web interface  
+- Backend:
+  - Validates required columns  
+  - Parses and standardizes date formats  
+
+---
+
+### 2. 🌐 Scrape
+- User clicks **"Start Scraping"**  
+- Backend actions:
+  - Launches headless Chrome browser  
+  - Navigates to the results portal  
+
+- For each student:
+  - Fills:
+    - Register Number  
+    - Date of Birth  
+    - Email format  
+    - Mobile number  
+  - Submits the form  
+  - Clicks on the **"Result"** link  
+  - Extracts the result table HTML  
+  - Retries up to **3 times** if a failure occurs  
+
+---
+
+### 3. 🧠 Parse
+- Uses `BeautifulSoup` to extract structured data:
+  - Student Name  
+  - Register Number  
+  - Subject Codes & Marks *(dynamically detected)*  
+
+---
+
+### 4. 📊 Export
+- All parsed data is merged into a single DataFrame  
+- Output structure:
+  - Name  
+  - Register Number  
+  - Subjects  
+  - Total Marks  
+
+- Final output:
+  - Downloadable as **`student_results.xlsx`**  
+
+---
+
 
 ## 📁 Project Structure
 
@@ -125,8 +146,6 @@ The input file must be either `.xlsx` (Excel) or `.csv` with **exactly two colum
 │   ├── index.html       # UI structure
 │   ├── style.css        # Glassmorphic dark theme
 │   └── app.js           # Upload, progress & results logic
-├── logs/
-│   └── scraper.log      # Runtime logs (auto-created)
 ├── requirements.txt
 ├── .gitignore
 └── README.md
