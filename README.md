@@ -1,6 +1,8 @@
-# 🎓 SLMGACCOE Results Scraper
+<<<<<<< HEAD
+# 🎓 GACSLM7 Results Scraper
 
 A web application that automates scraping student exam results from the **Government Arts College (Autonomous), Salem-7** [SLMGACCOE eCampus portal](https://slmgaccoe.edecampus.com/student/index.php). Upload a spreadsheet of student register numbers and dates of birth, hit scrape, and download a consolidated Excel report of all results — no manual copy-pasting needed.
+
 
 ## ✨ Features
 
@@ -84,6 +86,7 @@ The input file must be either `.xlsx` (Excel) or `.csv` with **exactly two colum
 
 ## 🔄 How It Works
 
+<<<<<<< HEAD
 ```
 ┌─────────────────────────────────────────────────────┐
 │  1. UPLOAD                                          │
@@ -112,6 +115,56 @@ The input file must be either `.xlsx` (Excel) or `.csv` with **exactly two colum
 │     → Downloadable as student_results.xlsx          │
 └─────────────────────────────────────────────────────┘
 ```
+=======
+### 1. 📤 Upload
+- User uploads a `.xlsx` or `.csv` file via the web interface  
+- Backend:
+  - Validates required columns  
+  - Parses and standardizes date formats  
+
+---
+
+### 2. 🌐 Scrape
+- User clicks **"Start Scraping"**  
+- Backend actions:
+  - Launches headless Chrome browser  
+  - Navigates to the results portal  
+
+- For each student:
+  - Fills:
+    - Register Number  
+    - Date of Birth  
+    - Email format  
+    - Mobile number  
+  - Submits the form  
+  - Clicks on the **"Result"** link  
+  - Extracts the result table HTML  
+  - Retries up to **3 times** if a failure occurs  
+
+---
+
+### 3. 🧠 Parse
+- Uses `BeautifulSoup` to extract structured data:
+  - Student Name  
+  - Register Number  
+  - Subject Codes & Marks *(dynamically detected)*  
+
+---
+
+### 4. 📊 Export
+- All parsed data is merged into a single DataFrame  
+- Output structure:
+  - Name  
+  - Register Number  
+  - Subjects  
+  - Total Marks  
+
+- Final output:
+  - Downloadable as **`student_results.xlsx`**  
+
+---
+
+>>>>>>> 3a61047fe8644964cc713b5868e026c241f23020
 
 ## 📁 Project Structure
 
@@ -126,8 +179,11 @@ The input file must be either `.xlsx` (Excel) or `.csv` with **exactly two colum
 │   ├── index.html       # UI structure
 │   ├── style.css        # Glassmorphic dark theme
 │   └── app.js           # Upload, progress & results logic
+<<<<<<< HEAD
 ├── logs/
 │   └── scraper.log      # Runtime logs (auto-created)
+=======
+>>>>>>> 3a61047fe8644964cc713b5868e026c241f23020
 ├── requirements.txt
 ├── .gitignore
 └── README.md
