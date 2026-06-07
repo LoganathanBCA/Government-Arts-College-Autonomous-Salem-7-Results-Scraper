@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # 🎓 GACSLM7 Results Scraper
 
 A web application that automates scraping student exam results from the **Government Arts College (Autonomous), Salem-7** [SLMGACCOE eCampus portal](https://slmgaccoe.edecampus.com/student/index.php). Upload a spreadsheet of student register numbers and dates of birth, hit scrape, and download a consolidated Excel report of all results — no manual copy-pasting needed.
@@ -86,7 +85,6 @@ The input file must be either `.xlsx` (Excel) or `.csv` with **exactly two colum
 
 ## 🔄 How It Works
 
-<<<<<<< HEAD
 ```
 ┌─────────────────────────────────────────────────────┐
 │  1. UPLOAD                                          │
@@ -164,7 +162,6 @@ The input file must be either `.xlsx` (Excel) or `.csv` with **exactly two colum
 
 ---
 
->>>>>>> 3a61047fe8644964cc713b5868e026c241f23020
 
 ## 📁 Project Structure
 
@@ -179,11 +176,6 @@ The input file must be either `.xlsx` (Excel) or `.csv` with **exactly two colum
 │   ├── index.html       # UI structure
 │   ├── style.css        # Glassmorphic dark theme
 │   └── app.js           # Upload, progress & results logic
-<<<<<<< HEAD
-├── logs/
-│   └── scraper.log      # Runtime logs (auto-created)
-=======
->>>>>>> 3a61047fe8644964cc713b5868e026c241f23020
 ├── requirements.txt
 ├── .gitignore
 └── README.md
