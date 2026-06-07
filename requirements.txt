@@ -1,4 +1,8 @@
+fastapi
+uvicorn[standard]
+selenium
+webdriver-manager
+beautifulsoup4
 pandas
 openpyxl
-selenium
-beautifulsoup4
+python-multipart
