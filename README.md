@@ -1,6 +1,7 @@
 # 🎓 GACSLM7 Results Scraper
 
-A web application that automates scraping student exam results from the **Government Arts College (Autonomous), Salem-7** [eCampus portal](https://ecampus.cc/gacslm7/index.php). Upload a spreadsheet of student register numbers and dates of birth, hit scrape, and download a consolidated Excel report of all results — no manual copy-pasting needed.
+A web application that automates scraping student exam results from the **Government Arts College (Autonomous), Salem-7** [SLMGACCOE eCampus portal](https://slmgaccoe.edecampus.com/student/index.php). Upload a spreadsheet of student register numbers and dates of birth, hit scrape, and download a consolidated Excel report of all results — no manual copy-pasting needed.
+
 
 ## ✨ Features
 
@@ -84,6 +85,35 @@ The input file must be either `.xlsx` (Excel) or `.csv` with **exactly two colum
 
 ## 🔄 How It Works
 
+```
+┌─────────────────────────────────────────────────────┐
+│  1. UPLOAD                                          │
+│     User uploads .xlsx or .csv file via the web UI  │
+│     → Backend validates columns & parses dates      │
+├─────────────────────────────────────────────────────┤
+│  2. SCRAPE                                          │
+│     User clicks "Start Scraping"                    │
+│     → Headless Chrome opens slmgaccoe.edecampus.com  │
+│     → For each student:                             │
+│        • Fill regno and dob                         │
+│        • Submit login form                          │
+│        • Navigate to ResultPrint.php                │
+│        • Extract the marks table HTML               │
+│        • Retry up to 3 times on failure             │
+├─────────────────────────────────────────────────────┤
+│  3. PARSE                                           │
+│     BeautifulSoup extracts from each result table:  │
+│     → Student name, register number                 │
+│     → Subject codes & marks (dynamically discovered)│
+├─────────────────────────────────────────────────────┤
+│  4. EXPORT                                          │
+│     All parsed results merged into one DataFrame    │
+│     → Columns: Name | Register No | [Subjects] |   │
+│        Total                                        │
+│     → Downloadable as student_results.xlsx          │
+└─────────────────────────────────────────────────────┘
+```
+=======
 ### 1. 📤 Upload
 - User uploads a `.xlsx` or `.csv` file via the web interface  
 - Backend:

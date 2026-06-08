@@ -2,13 +2,59 @@
 parser.py — BeautifulSoup HTML parsing for student result tables.
 
 Extracts student name, register number, and subject-wise marks dynamically.
-No hardcoded subject names — discovers subjects from the HTML.
+Supports two table layouts:
+  - Old (ecampus.cc): 8 cols, <br> in <strong>, table id="exam_datail"
+  - New (SLMGACCOE): 7 cols, colon-separated text in <strong>, no table id
 """
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 import logging
 
 logger = logging.getLogger(__name__)
+
+TABLE_IDS = ["exam_datail", "exam_detail", "result_table"]
+
+# Header labels (case-insensitive matching)
+NAME_LABELS = ["name of the candidate", "name of the student"]
+REGNO_LABELS = ["register number", "register no", "reg no"]
+SUBJECT_HEADERS = ["course code", "subject code", "sub-code", "sub code"]
+
+
+def _find_table(soup: BeautifulSoup) -> Tag | None:
+    """Locate the result table by known IDs, then fallback to first <table>."""
+    for tid in TABLE_IDS:
+        t = soup.find("table", id=tid)
+        if t:
+            return t
+    return soup.find("table")
+
+
+def _extract_after_colon(text: str, label: str) -> str | None:
+    """Extract value after 'label:' in text. Case-insensitive."""
+    lower = text.lower()
+    idx = lower.find(label.lower() + ":")
+    if idx == -1:
+        idx = lower.find(label.lower() + " :")
+        if idx == -1:
+            return None
+    val = text[idx + len(label) + 1:] if " :" not in text[idx:idx+len(label)+3] else text[idx + len(label) + 3:]
+    val = val.strip().strip(":")
+    return val if val else None
+
+
+def _extract_after_br(html: str) -> str | None:
+    """Extract text after <br> tag inside a <strong> element."""
+    if "<br" not in html:
+        return None
+    parts = html.split("<br", 1)
+    if len(parts) < 2:
+        return None
+    after_br = parts[1]
+    if ">" in after_br:
+        after_br = after_br.split(">", 1)[1]
+    val = after_br.split("</strong>")[0].strip()
+    val = val.replace("</strong", "").strip()
+    return val if val else None
 
 
 def parse_result_html(html: str) -> dict | None:
@@ -16,7 +62,7 @@ def parse_result_html(html: str) -> dict | None:
     Parse raw HTML of one student's result table.
 
     Args:
-        html: Raw HTML string containing the exam_datail table.
+        html: Raw HTML string containing the result table.
 
     Returns:
         Dictionary with keys:
@@ -27,98 +73,87 @@ def parse_result_html(html: str) -> dict | None:
     """
     try:
         soup = BeautifulSoup(html, "html.parser")
-        table = soup.find("table", id="exam_datail")
-        if not table:
-            # If the html IS the table itself
-            table = soup.find("table")
+        table = _find_table(soup)
         if not table:
             logger.error("No table found in HTML")
             return None
 
-        # Extract name and register number from thead rows
         name = "UNKNOWN"
         register_no = "UNKNOWN"
+        sub_code_idx = 1  # default for new portal (Course Code at col 1)
 
-        thead_rows = table.find("thead")
-        if thead_rows:
-            all_rows = thead_rows.find_all("tr")
-        else:
-            all_rows = table.find_all("tr")
+        # Scan all header rows (thead > tr, or all tr)
+        thead = table.find("thead")
+        rows = thead.find_all("tr") if thead else table.find_all("tr")
 
-        for row in all_rows:
-            strongs = row.find_all("strong")
-            for strong in strongs:
-                text_html = str(strong)
-                text_plain = strong.get_text(separator=" ").strip()
+        for row in rows:
+            # Check <strong> elements for student info
+            for strong in row.find_all("strong"):
+                text = strong.get_text(separator=" ").strip()
+                text_lower = text.lower()
 
-                if "NAME OF THE CANDIDATE" in text_plain:
-                    # Name is after <br> tag
-                    if "<br" in text_html:
-                        parts = text_html.split("<br")
-                        if len(parts) > 1:
-                            # Get text after the <br> and before </strong>
-                            after_br = parts[1]
-                            # Remove the closing > or /> 
-                            if ">" in after_br:
-                                after_br = after_br.split(">", 1)[1]
-                            name = after_br.split("</strong>")[0].strip()
-                            # Also handle <br/> variants
-                            name = name.replace("</strong", "").strip()
-                    if name == "UNKNOWN":
-                        name = text_plain.replace("NAME OF THE CANDIDATE", "").strip()
+                for label in NAME_LABELS:
+                    if label in text_lower:
+                        val = _extract_after_colon(text, label)
+                        if val:
+                            name = val
+                        if not val or name == "UNKNOWN":
+                            val = _extract_after_br(str(strong))
+                            if val:
+                                name = val
+                        break
 
-                elif "REGISTER NUMBER" in text_plain:
-                    if "<br" in text_html:
-                        parts = text_html.split("<br")
-                        if len(parts) > 1:
-                            after_br = parts[1]
-                            if ">" in after_br:
-                                after_br = after_br.split(">", 1)[1]
-                            register_no = after_br.split("</strong>")[0].strip()
-                            register_no = register_no.replace("</strong", "").strip()
-                    if register_no == "UNKNOWN":
-                        # Fallback: last word
-                        register_no = text_plain.split()[-1]
+                for label in REGNO_LABELS:
+                    if label in text_lower:
+                        val = _extract_after_colon(text, label)
+                        if val:
+                            register_no = val
+                        if not val or register_no == "UNKNOWN":
+                            val = _extract_after_br(str(strong))
+                            if val:
+                                register_no = val
+                        break
 
-        # Extract subject rows from tbody
+            # Check <th> elements for column headers to detect layout
+            for th in row.find_all("th"):
+                th_text = th.get_text(strip=True).lower()
+                for header in SUBJECT_HEADERS:
+                    if header in th_text:
+                        # Found the "Course Code" header - count its position
+                        all_ths = row.find_all("th")
+                        for i, t in enumerate(all_ths):
+                            if header in t.get_text(strip=True).lower():
+                                sub_code_idx = i
+                                break
+                        break
+
+        # Extract subject rows
         subjects = {}
         tbody = table.find("tbody")
-        if tbody:
-            data_rows = tbody.find_all("tr")
-        else:
-            # Fallback: all rows that have <td> elements
-            data_rows = [r for r in table.find_all("tr") if r.find("td")]
+        data_rows = (
+            tbody.find_all("tr")
+            if tbody
+            else [r for r in table.find_all("tr") if r.find("td")]
+        )
 
         for row in data_rows:
             cols = row.find_all("td")
-            if len(cols) < 7:
+            if len(cols) < 6:
                 continue
 
-            # Table structure (with colspan=2 on title):
-            # col 0: SEMESTER
-            # col 1: PART
-            # col 2: SUB-CODE
-            # col 3: TITLE OF PAPER (colspan=2, but BS4 sees it as 1 td)
-            # col 4: CA  (index 4 because colspan doesn't add extra td)
-            # col 5: SE
-            # col 6: TOTAL
-            # col 7: RESULT
-
-            subject_code = cols[2].get_text(strip=True)
+            # Subject code at detected column index
+            if sub_code_idx < len(cols):
+                subject_code = cols[sub_code_idx].get_text(strip=True)
+            else:
+                continue
             if not subject_code:
                 continue
 
-            # Total marks is at index 6 (TOTAL column)
-            # With colspan=2 on the title, we still have cols indexed as:
-            # 0=SEM, 1=PART, 2=SUB-CODE, 3=TITLE, 4=CA, 5=SE, 6=TOTAL, 7=RESULT
-            # But if the title has colspan=2, BS4 still treats it as a single <td>
-            # So we need to count from the end: TOTAL is cols[-2], RESULT is cols[-1]
-            # Safer approach: use index from end
-            total_col = cols[-2]  # TOTAL column (second from last)
+            # TOTAL is second from last column, RESULT is last
+            total_col = cols[-2]
             marks = total_col.get_text(strip=True)
 
-            # If marks is empty or dash, mark as "-"
-            if not marks or marks == "-" or marks.lower() == "ab":
+            if not marks or marks == "-" or marks.lower() in ("ab", "absent"):
                 marks = "-"
 
             subjects[subject_code] = marks
@@ -129,9 +164,7 @@ def parse_result_html(html: str) -> dict | None:
             "subjects": subjects,
         }
 
-        logger.info(
-            f"Parsed: {register_no} ({name}) — {len(subjects)} subjects"
-        )
+        logger.info(f"Parsed: {register_no} ({name}) — {len(subjects)} subjects")
         return result
 
     except Exception as e:

@@ -1,5 +1,5 @@
 """
-main.py — FastAPI backend for the GACSLM7 Results Scraper.
+main.py — FastAPI backend for the SLMGACCOE Results Scraper.
 
 Endpoints:
     POST /upload    — Accept .xlsx or .csv, parse it, return student list
@@ -83,9 +83,9 @@ logger.info("Logging initialized — file: %s", LOG_FILE)
 
 # ── FastAPI app ──────────────────────────────────────────────────────
 app = FastAPI(
-    title="GACSLM7 Results Scraper",
-    description="Automate scraping student exam results from the GACSLM7 eCampus portal.",
-    version="2.0.0",
+    title="SLMGACCOE Results Scraper",
+    description="Automate scraping student exam results from the SLMGACCOE eCampus portal.",
+    version="2.1.0",
 )
 
 app.add_middleware(
